@@ -1,5 +1,6 @@
 package com.zahid.dailydose.presentation.medication
 
+import android.Manifest
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.selection.selectable
@@ -21,11 +22,15 @@ import org.koin.androidx.compose.koinViewModel
 import java.util.Date
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationManagerCompat
 import com.zahid.dailydose.utils.getFileName
 import kotlinx.coroutines.launch
 
@@ -47,9 +52,11 @@ fun AddMedicationScreen(
             viewModel.loadMedicationForEdit(id)
         }
     }
-    
+
+
+
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState)},
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = {
@@ -108,22 +115,24 @@ fun AddMedicationScreen(
                 .padding(paddingValues)
                 .padding(bottom = 50.dp)
         ) {
+            NotificationPermissionHandler(
+                snackbarHostState = snackbarHostState)
             // Progress indicator
             LinearProgressIndicator(
-            progress = { uiState.currentStep / 5f },
-            modifier = Modifier.fillMaxWidth(),
-            color = ProgressIndicatorDefaults.linearColor,
-            trackColor = ProgressIndicatorDefaults.linearTrackColor,
-            strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
+                progress = { uiState.currentStep / 5f },
+                modifier = Modifier.fillMaxWidth(),
+                color = ProgressIndicatorDefaults.linearColor,
+                trackColor = ProgressIndicatorDefaults.linearTrackColor,
+                strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
             )
-            
+
             // Step indicator
             Text(
                 text = "Step ${uiState.currentStep} of 5",
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(16.dp)
             )
-            
+
             // Form content
             LazyColumn(
                 modifier = Modifier
@@ -135,40 +144,88 @@ fun AddMedicationScreen(
                     1 -> {
                         item { BasicDetailsStep(viewModel = viewModel) }
                     }
+
                     2 -> {
                         item { ScheduleStep(viewModel = viewModel) }
                     }
+
                     3 -> {
                         item { RemindersStep(viewModel = viewModel) }
                     }
+
                     4 -> {
                         item { DoctorStep(viewModel = viewModel) }
                     }
+
                     5 -> {
                         item { NotesStep(viewModel = viewModel) }
                     }
                 }
-                
+
                 item {
                     Spacer(modifier = Modifier.height(16.dp))
                 }
             }
-            
+
             // Navigation buttons
 
         }
     }
-    
+
     // Handle navigation after successful save
     LaunchedEffect(uiState.isSaved) {
         if (uiState.isSaved) {
             scope.launch {
                 snackbarHostState.showSnackbar(
-                    if (uiState.isEditMode) "Medication updated successfully!" 
+                    if (uiState.isEditMode) "Medication updated successfully!"
                     else "Medication saved successfully!"
                 )
             }
             onMedicationAdded()
+        }
+    }
+}
+
+@Composable
+fun NotificationPermissionHandler(
+    snackbarHostState: SnackbarHostState
+) {
+    val context = LocalContext.current
+    var showMessage by remember { mutableStateOf("") }
+
+    // Launcher to request POST_NOTIFICATIONS permission
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (!isGranted) {
+            showMessage = "❌ Notifications permission denied! We wont be able to show reminders."
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val granted = ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+
+            if (!granted) {
+                launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        } else {
+            // On Android < 13, check via NotificationManagerCompat
+            if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) {
+                showMessage =
+                    "⚠️ Notifications disabled in settings. We wont be able to show reminders"
+            }
+        }
+    }
+
+    if (showMessage.isNotEmpty()) {
+        SnackbarHost(hostState = remember { SnackbarHostState() }).apply {
+            LaunchedEffect(showMessage) {
+                snackbarHostState.showSnackbar(showMessage)
+            }
         }
     }
 }

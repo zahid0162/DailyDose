@@ -11,6 +11,8 @@ import androidx.navigation.compose.composable
 import com.zahid.dailydose.presentation.auth.LoginScreen
 import com.zahid.dailydose.presentation.auth.RegisterScreen
 import com.zahid.dailydose.presentation.MainBottomNavigation
+import com.zahid.dailydose.presentation.care.AddHealthMetricScreen
+import com.zahid.dailydose.presentation.care.HealthMetricsHistoryScreen
 import com.zahid.dailydose.presentation.home.HomeViewModel
 import com.zahid.dailydose.presentation.medication.AddMedicationScreen
 import com.zahid.dailydose.presentation.medication.MedicationViewModel
@@ -18,6 +20,8 @@ import com.zahid.dailydose.presentation.medication.ViewMedicationScreen
 import com.zahid.dailydose.presentation.onboarding.OnboardingScreen
 import com.zahid.dailydose.presentation.patient.PatientOnboardingScreen
 import com.zahid.dailydose.presentation.splash.SplashScreen
+import com.zahid.dailydose.domain.model.HealthMetricType
+import com.zahid.dailydose.presentation.care.CareViewModel
 import org.koin.androidx.compose.koinViewModel
 
 sealed class Screen(val route: String) {
@@ -33,6 +37,12 @@ sealed class Screen(val route: String) {
     }
     object EditMedication : Screen("edit_medication/{medicationId}") {
         fun createRoute(medicationId: String) = "edit_medication/$medicationId"
+    }
+    object AddHealthMetric : Screen("add_health_metric/{metricType}") {
+        fun createRoute(metricType: HealthMetricType) = "add_health_metric/${metricType.name}"
+    }
+    object HealthMetricHistory : Screen("health_metric_history/{metricType}") {
+        fun createRoute(metricType: HealthMetricType) = "health_metric_history/${metricType.name}"
     }
 }
 
@@ -135,6 +145,7 @@ fun DailyDoseNavigation(
             }
             val homeViewModel  = koinViewModel<HomeViewModel>(viewModelStoreOwner = backStackEntry)
             val medViewModel  = koinViewModel<MedicationViewModel>(viewModelStoreOwner = backStackEntry)
+            val careViewModel  = koinViewModel<CareViewModel>(viewModelStoreOwner = backStackEntry)
             MainBottomNavigation(
                 onNavigateToAddMedication = {
                     navController.navigate(Screen.AddMedication.route)
@@ -145,8 +156,15 @@ fun DailyDoseNavigation(
                 onNavigateToEditMedication = { medicationId ->
                     navController.navigate(Screen.EditMedication.createRoute(medicationId))
                 },
+                onNavigateToAddHealthMetric = { metricType ->
+                    navController.navigate(Screen.AddHealthMetric.createRoute(metricType))
+                },
+                onNavigateToHealthMetricHistory = { metricType ->
+                    navController.navigate(Screen.HealthMetricHistory.createRoute(metricType))
+                },
                 homeViewModel,
-                medViewModel
+                medViewModel,
+                careViewModel = careViewModel
             )
         }
         
@@ -198,6 +216,50 @@ fun DailyDoseNavigation(
                     medViewModel.refreshMedications()
                     navController.popBackStack()
                 }
+            )
+        }
+        
+        composable(Screen.AddHealthMetric.route) { backStackEntry ->
+            val bk = remember(backStackEntry) {
+                navController.getBackStackEntry(Screen.Home.route)
+            }
+            val metricTypeString = backStackEntry.arguments?.getString("metricType") ?: ""
+            val metricType = try {
+                HealthMetricType.valueOf(metricTypeString)
+            } catch (e: IllegalArgumentException) {
+                HealthMetricType.HEART_RATE // Default fallback
+            }
+            val careViewModel  = koinViewModel<CareViewModel>(viewModelStoreOwner = bk)
+            AddHealthMetricScreen(
+                metricType = metricType,
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onAddedNew = {
+                    navController.popBackStack()
+                    careViewModel.refresh()
+                },
+                careViewModel
+            )
+        }
+        
+        composable(Screen.HealthMetricHistory.route) { backStackEntry ->
+            val bk = remember(backStackEntry) {
+                navController.getBackStackEntry(Screen.Home.route)
+            }
+            val metricTypeString = backStackEntry.arguments?.getString("metricType") ?: ""
+            val metricType = try {
+                HealthMetricType.valueOf(metricTypeString)
+            } catch (e: IllegalArgumentException) {
+                HealthMetricType.HEART_RATE // Default fallback
+            }
+            val careViewModel  = koinViewModel<CareViewModel>(viewModelStoreOwner = bk)
+            HealthMetricsHistoryScreen(
+                metricType = metricType,
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                careViewModel
             )
         }
     }

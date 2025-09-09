@@ -22,6 +22,8 @@ import com.zahid.dailydose.presentation.home.HomeScreen
 import com.zahid.dailydose.presentation.home.HomeViewModel
 import com.zahid.dailydose.presentation.medication.MedicationScreen
 import com.zahid.dailydose.presentation.medication.MedicationViewModel
+import com.zahid.dailydose.domain.model.HealthMetricType
+import com.zahid.dailydose.presentation.care.CareViewModel
 import org.koin.androidx.compose.koinViewModel
 
 sealed class BottomNavItem(
@@ -41,8 +43,11 @@ fun MainBottomNavigation(
     onNavigateToAddMedication: () -> Unit = {},
     onNavigateToViewMedication: (String) -> Unit = {},
     onNavigateToEditMedication: (String) -> Unit = {},
+    onNavigateToAddHealthMetric: (HealthMetricType) -> Unit = {},
+    onNavigateToHealthMetricHistory: (HealthMetricType) -> Unit = {},
     homeViewModel: HomeViewModel = koinViewModel(),
-    medicationViewModel: MedicationViewModel = koinViewModel()
+    medicationViewModel: MedicationViewModel = koinViewModel(),
+    careViewModel: CareViewModel = koinViewModel()
 ) {
     var selectedTab by rememberSaveable { mutableIntStateOf(0) }
     val tabs = listOf(
@@ -178,7 +183,11 @@ fun MainBottomNavigation(
                         onNavigateToEditMedication = onNavigateToEditMedication
                     )
                     2 -> HistoryScreen()
-                    3 -> CareScreen()
+                    3 -> CareScreen(
+                        onNavigateToAddMetric = onNavigateToAddHealthMetric,
+                        onNavigateToMetricHistory = onNavigateToHealthMetricHistory,
+                        careViewModel
+                    )
                 }
             }
         }
