@@ -141,6 +141,31 @@ class MedicationRepositoryImpl : MedicationRepository {
         }
     }
     
+    override suspend fun getMedicationsForDate(userId: String, date: Date): List<Medication> {
+        return try {
+            val response = supabase.postgrest.from("medications")
+                .select{
+                    filter {
+                        eq("user_id", userId)
+                        eq("is_active", true)
+                        lte("start_date", date.time)
+                        or {
+                            gte("end_date", date.time)
+                            or {
+                                MedicationDto::endDate isExact null
+                            }
+                        }
+                    }
+                    order("created_at", Order.DESCENDING)
+                }
+                .decodeList<MedicationDto>()
+            
+            response.map { MedicationDto.toMedication(it) }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+    
     override fun observeMedicationsByUserId(userId: String): Flow<List<Medication>> = flow {
         try {
             val medications = getMedicationsByUserId(userId)

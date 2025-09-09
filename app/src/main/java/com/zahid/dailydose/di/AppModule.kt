@@ -19,6 +19,7 @@ import com.zahid.dailydose.presentation.SimpleMainViewModel
 import com.zahid.dailydose.presentation.auth.LoginViewModel
 import com.zahid.dailydose.presentation.auth.RegisterViewModel
 import com.zahid.dailydose.presentation.care.CareViewModel
+import com.zahid.dailydose.presentation.history.HistoryViewModel
 import com.zahid.dailydose.presentation.home.HomeViewModel
 import com.zahid.dailydose.presentation.medication.AddMedicationViewModel
 import com.zahid.dailydose.presentation.medication.MedicationViewModel
@@ -59,4 +60,5 @@ val appModule = module {
     viewModel { PatientOnboardingViewModel(get(), get()) }
     viewModel { SplashViewModel(get(), get(),get()) }
     viewModel { ViewMedicationViewModel() }
+    viewModel { HistoryViewModel(get()) }
 }

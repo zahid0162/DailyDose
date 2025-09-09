@@ -43,6 +43,5 @@ fun DailyDoseApp() {
     DailyDoseNavigation(
         navController = navController,
         startDestination = Screen.Splash.route,
-
     )
 }

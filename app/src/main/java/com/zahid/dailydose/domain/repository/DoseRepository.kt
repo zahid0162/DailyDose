@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.Flow
 interface DoseRepository {
     suspend fun getTodaysDoses(userId: String): List<Dose>
     suspend fun getDosesByMedicationId(medicationId: String): List<Dose>
+    suspend fun getDosesForDateRange(userId: String, startTime: Long, endTime: Long): List<Dose>
     suspend fun markDoseAsTaken(doseId: String): Result<Boolean>
     suspend fun createDoseLog(dose: Dose): Result<Boolean>
     suspend fun updateDoseStatus(doseId: String, status: com.zahid.dailydose.domain.model.DoseStatus): Result<Boolean>

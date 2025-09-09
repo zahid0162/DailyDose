@@ -10,11 +10,16 @@ class DoseCalculationService {
     
     fun calculateTodaysDoses(medications: List<Medication>, userId: String): List<Dose> {
         val today = Calendar.getInstance()
+        return calculateDosesForDate(medications, userId, today.time)
+    }
+    
+    fun calculateDosesForDate(medications: List<Medication>, userId: String, date: Date): List<Dose> {
+        val targetDate = Calendar.getInstance().apply { time = date }
         val doses = mutableListOf<Dose>()
         
         medications.forEach { medication ->
-            if (isMedicationActiveToday(medication, today)) {
-                val medicationDoses = calculateDosesForMedication(medication, today, userId)
+            if (isMedicationActiveOnDate(medication, targetDate)) {
+                val medicationDoses = calculateDosesForMedication(medication, targetDate, userId)
                 doses.addAll(medicationDoses)
             }
         }
@@ -23,16 +28,20 @@ class DoseCalculationService {
     }
     
     private fun isMedicationActiveToday(medication: Medication, today: Calendar): Boolean {
+        return isMedicationActiveOnDate(medication, today)
+    }
+    
+    private fun isMedicationActiveOnDate(medication: Medication, targetDate: Calendar): Boolean {
         val startDate = Calendar.getInstance().apply { time = medication.startDate }
         val endDate = medication.endDate?.let { 
             Calendar.getInstance().apply { time = it }
         }
         
         // Check if medication has started
-        if (today.before(startDate)) return false
+        if (targetDate.before(startDate)) return false
         
         // Check if medication has ended (if it has an end date)
-        if (endDate != null && today.after(endDate)) return false
+        if (endDate != null && targetDate.after(endDate)) return false
         
         return medication.isActive
     }

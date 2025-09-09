@@ -11,5 +11,6 @@ interface MedicationRepository {
     suspend fun updateMedication(medication: Medication): Result<Medication>
     suspend fun deleteMedication(medicationId: String): Result<Unit>
     suspend fun getTodaysMedications(userId: String): List<Medication>
+    suspend fun getMedicationsForDate(userId: String, date: java.util.Date): List<Medication>
     fun observeMedicationsByUserId(userId: String): Flow<List<Medication>>
 }

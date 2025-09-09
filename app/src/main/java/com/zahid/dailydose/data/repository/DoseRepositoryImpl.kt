@@ -64,6 +64,25 @@ class DoseRepositoryImpl : DoseRepository {
         }
     }
     
+    override suspend fun getDosesForDateRange(userId: String, startTime: Long, endTime: Long): List<Dose> {
+        return try {
+            val response = supabase.postgrest.from("dose_logs")
+                .select {
+                    filter {
+                        eq("user_id", userId)
+                        gte("dose_time", startTime)
+                        lt("dose_time", endTime)
+                    }
+                    order("dose_time", Order.ASCENDING)
+                }
+                .decodeList<DoseDto>()
+            
+            response.map { DoseDto.toDose(it) }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+    
     override suspend fun markDoseAsTaken(doseId: String): Result<Boolean> {
         return try {
             val currentTime = System.currentTimeMillis()
