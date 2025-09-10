@@ -25,6 +25,7 @@ import com.zahid.dailydose.presentation.medication.MedicationViewModel
 import com.zahid.dailydose.presentation.settings.SettingsScreen
 import com.zahid.dailydose.domain.model.HealthMetricType
 import com.zahid.dailydose.presentation.care.CareViewModel
+import com.zahid.dailydose.presentation.medication.NotificationPermissionHandler
 import com.zahid.dailydose.presentation.settings.SettingsViewModel
 import org.koin.androidx.compose.koinViewModel
 
@@ -64,8 +65,12 @@ fun MainBottomNavigation(
         BottomNavItem.Care,
         BottomNavItem.Settings
     )
+    val snackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(
+        snackbarHost = {
+            snackbarHostState
+        },
         topBar = {
             TopAppBar(
                 title = {
@@ -179,6 +184,7 @@ fun MainBottomNavigation(
                 when (tab) {
                     0 -> HomeScreen(viewModel = homeViewModel,onNavigateToAddMedication = onNavigateToAddMedication)
                     1 -> MedicationScreen(
+                        snackbarHostState,
                         viewModel = medicationViewModel, 
                         onNavigateToAddMedication = onNavigateToAddMedication,
                         onNavigateToViewMedication = onNavigateToViewMedication,

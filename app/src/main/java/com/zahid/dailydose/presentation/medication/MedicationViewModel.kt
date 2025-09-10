@@ -3,6 +3,7 @@ package com.zahid.dailydose.presentation.medication
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zahid.dailydose.data.repository.AuthStateManager
+import com.zahid.dailydose.data.service.NotificationService
 import com.zahid.dailydose.domain.model.Medication
 import com.zahid.dailydose.domain.repository.MedicationRepository
 import io.github.jan.supabase.SupabaseClient
@@ -23,13 +24,19 @@ data class MedicationUiState(
 class MedicationViewModel(val supabaseClient: SupabaseClient) : ViewModel(), KoinComponent {
     
     private val medicationRepository: MedicationRepository by inject()
-
+    private val notificationService: NotificationService by inject()
     
     private val _uiState = MutableStateFlow(MedicationUiState())
     val uiState: StateFlow<MedicationUiState> = _uiState.asStateFlow()
     
     init {
         loadMedications()
+    }
+
+    fun saveReminders(){
+        _uiState.value.medications.forEach {
+            notificationService.scheduleMedicationReminders(it)
+        }
     }
     
     private fun loadMedications() {
@@ -41,6 +48,10 @@ class MedicationViewModel(val supabaseClient: SupabaseClient) : ViewModel(), Koi
                 
                 if (userId != null) {
                     val medications = medicationRepository.getMedicationsByUserId(userId)
+                    medications.forEach {
+                        notificationService.scheduleMedicationReminders(it)
+                    }
+
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
                         medications = medications

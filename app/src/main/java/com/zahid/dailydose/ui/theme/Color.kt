@@ -32,4 +32,4 @@ val TextOnPrimary = Color(0xFFFFFFFF)      // Text on primary green
 val TextOnDark = Color(0xFFE0E0E0)         // Text on dark backgrounds
 
 // Splash Screen
-val SplashBg = Color(0xFFE8F5E9)             // Soft green for welcoming splash
+val SplashBg = Color(0xFFececec)             // Soft green for welcoming splash

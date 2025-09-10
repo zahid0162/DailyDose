@@ -19,13 +19,16 @@ import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun MedicationScreen(
+    snackbarHostState: SnackbarHostState,
     onNavigateToAddMedication: () -> Unit = {},
     onNavigateToViewMedication: (String) -> Unit = {},
     onNavigateToEditMedication: (String) -> Unit = {},
     viewModel: MedicationViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
+    NotificationPermissionHandler(snackbarHostState){
+        viewModel.saveReminders()
+    }
     when {
         uiState.isLoading -> {
             Box(

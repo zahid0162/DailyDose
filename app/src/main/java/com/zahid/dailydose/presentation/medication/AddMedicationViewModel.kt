@@ -48,7 +48,6 @@ data class AddMedicationUiState(
 class AddMedicationViewModel(val supabaseClient: SupabaseClient) : ViewModel(), KoinComponent {
     
     private val medicationRepository: MedicationRepository by inject()
-    private val authStateManager: AuthStateManager by inject()
     private val notificationService: NotificationService by inject()
     
     private val _uiState = MutableStateFlow(AddMedicationUiState())

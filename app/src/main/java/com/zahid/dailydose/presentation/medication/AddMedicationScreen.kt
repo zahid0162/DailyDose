@@ -188,7 +188,8 @@ fun AddMedicationScreen(
 
 @Composable
 fun NotificationPermissionHandler(
-    snackbarHostState: SnackbarHostState
+    snackbarHostState: SnackbarHostState,
+    onSuccess:() -> Unit = {}
 ) {
     val context = LocalContext.current
     var showMessage by remember { mutableStateOf("") }
@@ -212,11 +213,17 @@ fun NotificationPermissionHandler(
             if (!granted) {
                 launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
+            else{
+                onSuccess()
+            }
         } else {
             // On Android < 13, check via NotificationManagerCompat
             if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) {
                 showMessage =
                     "⚠️ Notifications disabled in settings. We wont be able to show reminders"
+            }
+            else{
+                onSuccess()
             }
         }
     }
