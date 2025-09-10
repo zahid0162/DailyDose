@@ -10,34 +10,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.*
 
-data class PatientOnboardingUiState(
-    val currentStep: Int = 1,
-    val totalSteps: Int = 3,
-    val isLoading: Boolean = false,
-    val errorMessage: String? = null,
 
-    // Step 1: Personal Info
-    val fullName: String = "",
-    val dateOfBirth: Date? = null,
-    val gender: Gender? = null,
-    val contactNumber: String = "",
-
-    // Step 2: Medical Info
-    val medicalConditions: List<String> = emptyList(),
-    val allergies: List<String> = emptyList(),
-    val primaryDoctorName: String = "",
-    val primaryDoctorContact: String = "",
-
-    // Step 3: Emergency Info
-    val emergencyContactName: String = "",
-    val emergencyContactPhone: String = "",
-    val bloodGroup: BloodGroup? = null,
-
-    val isOnboardingComplete: Boolean = false
-)
 
 sealed class PatientOnboardingEvent {
     // Navigation
@@ -65,6 +42,8 @@ sealed class PatientOnboardingEvent {
     data class BloodGroupChanged(val bloodGroup: BloodGroup) : PatientOnboardingEvent()
 
     object ClearError : PatientOnboardingEvent()
+    data class LoadPatientToEdit(val id:String) : PatientOnboardingEvent()
+    object SetEditMode: PatientOnboardingEvent()
 }
 
 sealed class PatientOnboardingEffect {
@@ -175,6 +154,18 @@ class PatientOnboardingViewModel(
             is PatientOnboardingEvent.ClearError -> {
                 _uiState.value = _uiState.value.copy(errorMessage = null)
             }
+
+            is PatientOnboardingEvent.SetEditMode -> {
+                _uiState.update {
+                    it.copy(
+                        isEditMode = true
+                    )
+                }
+            }
+
+            is PatientOnboardingEvent.LoadPatientToEdit -> {
+                loadPatient(event.id)
+            }
         }
     }
 
@@ -233,7 +224,7 @@ class PatientOnboardingViewModel(
                 val currentUser = authRepository.getCurrentUser().getOrThrow()
 
                 val patient = Patient(
-                    id = UUID.randomUUID().toString(),
+                    id = if (_uiState.value.isEditMode) _uiState.value.id else UUID.randomUUID().toString(),
                     userId = currentUser.id,
                     personalInfo = PersonalInfo(
                         fullName = _uiState.value.fullName,
@@ -255,7 +246,7 @@ class PatientOnboardingViewModel(
                     updatedAt = System.currentTimeMillis()
                 )
 
-                val result = patientRepository.createPatient(patient)
+                val result = if (_uiState.value.isEditMode)patientRepository.updatePatient(patient) else patientRepository.createPatient(patient)
                 result.fold(
                     onSuccess = {
                         _uiState.value = _uiState.value.copy(
@@ -279,4 +270,65 @@ class PatientOnboardingViewModel(
             }
         }
     }
+
+    private  fun loadPatient(id:String){
+        _uiState.update {
+            it.copy(
+                id = id
+            )
+        }
+        viewModelScope.launch {
+            val result = patientRepository.getPatient(id)
+            if (result.isSuccess){
+                val pat = result.getOrNull()
+                pat?.let { pat ->
+                    _uiState.update {
+                        it.copy(
+                            fullName = pat.personalInfo.fullName,
+                            dateOfBirth = pat.personalInfo.dateOfBirth,
+                            gender = pat.personalInfo.gender,
+                            contactNumber = pat.personalInfo.contactNumber?:"",
+                            medicalConditions = pat.medicalInfo.medicalConditions,
+                            allergies = pat.medicalInfo.allergies,
+                            primaryDoctorName = pat.medicalInfo.primaryDoctorName ?:"",
+                            primaryDoctorContact = pat.medicalInfo.primaryDoctorContact?:"",
+                            emergencyContactName = pat.emergencyContactName,
+                            emergencyContactPhone = pat.emergencyContactPhone,
+                            bloodGroup = pat.bloodGroup
+
+
+                        )
+                    }
+                }
+            }
+        }
+    }
 }
+
+data class PatientOnboardingUiState(
+    val id:String = "",
+    val currentStep: Int = 1,
+    val totalSteps: Int = 3,
+    val isLoading: Boolean = false,
+    val errorMessage: String? = null,
+
+    // Step 1: Personal Info
+    val fullName: String = "",
+    val dateOfBirth: Date? = null,
+    val gender: Gender? = null,
+    val contactNumber: String = "",
+
+    // Step 2: Medical Info
+    val medicalConditions: List<String> = emptyList(),
+    val allergies: List<String> = emptyList(),
+    val primaryDoctorName: String = "",
+    val primaryDoctorContact: String = "",
+
+    // Step 3: Emergency Info
+    val emergencyContactName: String = "",
+    val emergencyContactPhone: String = "",
+    val bloodGroup: BloodGroup? = null,
+
+    val isOnboardingComplete: Boolean = false,
+    val isEditMode:Boolean = false
+)

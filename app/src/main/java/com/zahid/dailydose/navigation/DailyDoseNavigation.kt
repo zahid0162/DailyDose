@@ -44,6 +44,10 @@ sealed class Screen(val route: String) {
     object HealthMetricHistory : Screen("health_metric_history/{metricType}") {
         fun createRoute(metricType: HealthMetricType) = "health_metric_history/${metricType.name}"
     }
+    object Settings : Screen("settings")
+    object EditPatient : Screen("edit_patient/{patientId}") {
+        fun createRoute(medicationId: String) = "edit_patient/$medicationId"
+    }
 }
 
 @Composable
@@ -135,7 +139,8 @@ fun DailyDoseNavigation(
                     navController.navigate(Screen.Splash.route) {
                         popUpTo(Screen.PatientOnboarding.route) { inclusive = true }
                     }
-                }
+                },
+                patientId = null
             )
         }
         
@@ -161,6 +166,17 @@ fun DailyDoseNavigation(
                 },
                 onNavigateToHealthMetricHistory = { metricType ->
                     navController.navigate(Screen.HealthMetricHistory.createRoute(metricType))
+                },
+                onNavigateToSettings = {
+                    navController.navigate(Screen.Settings.route)
+                },
+                onNavigateToEditPatient = { patientId->
+                    navController.navigate(Screen.EditPatient.createRoute(patientId))
+                },
+                onNavigateToLogin = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(Screen.Home.route) { inclusive = true }
+                    }
                 },
                 homeViewModel,
                 medViewModel,
@@ -260,6 +276,21 @@ fun DailyDoseNavigation(
                     navController.popBackStack()
                 },
                 careViewModel
+            )
+        }
+
+        composable(Screen.EditPatient.route) { bk ->
+            val medicationId = bk.arguments?.getString("patientId") ?: ""
+            val backStackEntry = remember(bk) {
+                navController.getBackStackEntry(Screen.Home.route)
+            }
+            val homeViewModel : HomeViewModel = koinViewModel<HomeViewModel>(viewModelStoreOwner = backStackEntry)
+            val medViewModel  = koinViewModel<MedicationViewModel>(viewModelStoreOwner = backStackEntry)
+            PatientOnboardingScreen(
+                patientId = medicationId,
+                onNavigateToHome = {
+                    navController.popBackStack()
+                }
             )
         }
     }

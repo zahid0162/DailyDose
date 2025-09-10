@@ -35,6 +35,7 @@ class PatientRepositoryImpl(
                     filter {
                         eq("id", patient.id)
                     }
+                    select()
                 }
                 .decodeSingleOrNull<PatientDto>()
             

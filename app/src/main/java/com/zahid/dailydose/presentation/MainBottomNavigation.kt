@@ -22,6 +22,7 @@ import com.zahid.dailydose.presentation.home.HomeScreen
 import com.zahid.dailydose.presentation.home.HomeViewModel
 import com.zahid.dailydose.presentation.medication.MedicationScreen
 import com.zahid.dailydose.presentation.medication.MedicationViewModel
+import com.zahid.dailydose.presentation.settings.SettingsScreen
 import com.zahid.dailydose.domain.model.HealthMetricType
 import com.zahid.dailydose.presentation.care.CareViewModel
 import org.koin.androidx.compose.koinViewModel
@@ -35,6 +36,7 @@ sealed class BottomNavItem(
     object Medication : BottomNavItem("medication", "Medication", Icons.Default.Medication)
     object History : BottomNavItem("history", "History", Icons.Default.History)
     object Care : BottomNavItem("care", "Care", Icons.Default.Favorite)
+    object Settings : BottomNavItem("settings", "Settings", Icons.Default.Settings)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -45,6 +47,9 @@ fun MainBottomNavigation(
     onNavigateToEditMedication: (String) -> Unit = {},
     onNavigateToAddHealthMetric: (HealthMetricType) -> Unit = {},
     onNavigateToHealthMetricHistory: (HealthMetricType) -> Unit = {},
+    onNavigateToSettings: () -> Unit = {},
+    onNavigateToEditPatient: (String) -> Unit = {},
+    onNavigateToLogin: () -> Unit = {},
     homeViewModel: HomeViewModel = koinViewModel(),
     medicationViewModel: MedicationViewModel = koinViewModel(),
     careViewModel: CareViewModel = koinViewModel()
@@ -54,7 +59,8 @@ fun MainBottomNavigation(
         BottomNavItem.Home,
         BottomNavItem.Medication,
         BottomNavItem.History,
-        BottomNavItem.Care
+        BottomNavItem.Care,
+        BottomNavItem.Settings
     )
 
     Scaffold(
@@ -110,15 +116,9 @@ fun MainBottomNavigation(
 
                         }
 
-                        2 -> {
-                            IconButton(onClick = { /* TODO: Filter history */ }) {
-                                Icon(Icons.Default.FilterList, contentDescription = "Filter")
-                            }
-                        }
-
                         3 -> {
-                            IconButton(onClick = { /* TODO: Settings */ }) {
-                                Icon(Icons.Default.Settings, contentDescription = "Settings")
+                            IconButton(onClick = { /* Care screen actions */ }) {
+                                Icon(Icons.Default.Favorite, contentDescription = "Care")
                             }
                         }
                     }
@@ -187,6 +187,10 @@ fun MainBottomNavigation(
                         onNavigateToAddMetric = onNavigateToAddHealthMetric,
                         onNavigateToMetricHistory = onNavigateToHealthMetricHistory,
                         careViewModel
+                    )
+                    4 -> SettingsScreen(
+                        onNavigateToEditPatient = onNavigateToEditPatient,
+                        onNavigateToLogin = onNavigateToLogin
                     )
                 }
             }

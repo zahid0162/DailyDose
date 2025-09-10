@@ -17,6 +17,7 @@ import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun PatientOnboardingScreen(
+    patientId:String?,
     onNavigateToHome: () -> Unit,
     viewModel: PatientOnboardingViewModel = koinViewModel()
 ) {
@@ -24,7 +25,14 @@ fun PatientOnboardingScreen(
     val effects = viewModel.effects
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-    
+
+
+    LaunchedEffect(patientId) {
+        patientId?.let { id ->
+            viewModel.handleEvent(PatientOnboardingEvent.SetEditMode)
+            viewModel.handleEvent(PatientOnboardingEvent.LoadPatientToEdit(id = id))
+        }
+    }
     // Handle effects
     LaunchedEffect(effects) {
         effects.collect { effect ->

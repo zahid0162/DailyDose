@@ -26,10 +26,12 @@ import com.zahid.dailydose.presentation.medication.MedicationViewModel
 import com.zahid.dailydose.presentation.medication.ViewMedicationViewModel
 import com.zahid.dailydose.presentation.onboarding.OnboardingViewModel
 import com.zahid.dailydose.presentation.patient.PatientOnboardingViewModel
+import com.zahid.dailydose.presentation.settings.SettingsViewModel
 import com.zahid.dailydose.presentation.splash.SplashViewModel
 import io.github.jan.supabase.SupabaseClient
-import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
+
 
 val appModule = module {
     
@@ -60,5 +62,6 @@ val appModule = module {
     viewModel { PatientOnboardingViewModel(get(), get()) }
     viewModel { SplashViewModel(get(), get(),get()) }
     viewModel { ViewMedicationViewModel() }
+    viewModel { SettingsViewModel() }
     viewModel { HistoryViewModel(get()) }
 }
