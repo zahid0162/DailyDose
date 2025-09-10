@@ -1,5 +1,6 @@
 package com.zahid.dailydose.navigation
 
+import ChangePasswordScreen
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,6 +23,8 @@ import com.zahid.dailydose.presentation.patient.PatientOnboardingScreen
 import com.zahid.dailydose.presentation.splash.SplashScreen
 import com.zahid.dailydose.domain.model.HealthMetricType
 import com.zahid.dailydose.presentation.care.CareViewModel
+import com.zahid.dailydose.presentation.patient.PatientOnboardingViewModel
+import com.zahid.dailydose.presentation.settings.SettingsViewModel
 import org.koin.androidx.compose.koinViewModel
 
 sealed class Screen(val route: String) {
@@ -31,6 +34,7 @@ sealed class Screen(val route: String) {
     object Register : Screen("register")
     object PatientOnboarding : Screen("patient_onboarding")
     object Home : Screen("home")
+    object ChangePassword : Screen("change_password")
     object AddMedication : Screen("add_medication")
     object ViewMedication : Screen("view_medication/{medicationId}") {
         fun createRoute(medicationId: String) = "view_medication/$medicationId"
@@ -89,11 +93,20 @@ fun DailyDoseNavigation(
             OnboardingScreen(
                 onComplete = {
                     // Navigate back to splash to re-evaluate auth state
-                    navController.navigate(Screen.Splash.route) {
+                    navController.navigate(Screen.Login.route) {
                         popUpTo(Screen.Onboarding.route) { inclusive = true }
                     }
                 }
             )
+        }
+
+        composable(Screen.ChangePassword.route) {
+                bk->
+            val backStackEntry = remember(bk) {
+                navController.getBackStackEntry(Screen.Home.route)
+            }
+            val settingsViewMode = koinViewModel< SettingsViewModel>(viewModelStoreOwner = backStackEntry)
+            ChangePasswordScreen(navController, settingsViewMode)
         }
         
         composable(Screen.Login.route) {
@@ -103,13 +116,13 @@ fun DailyDoseNavigation(
                 },
                 onNavigateToHome = {
                     // Navigate back to splash to re-evaluate auth state
-                    navController.navigate(Screen.Splash.route) {
+                    navController.navigate(Screen.Home.route) {
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }
                 },
                 onNavigateToPatientOnboarding = {
                     // Navigate back to splash to re-evaluate auth state
-                    navController.navigate(Screen.Splash.route) {
+                    navController.navigate(Screen.PatientOnboarding.route) {
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }
                 }
@@ -125,7 +138,7 @@ fun DailyDoseNavigation(
                 },
                 onNavigateToPatientOnboarding = {
                     // Navigate back to splash to re-evaluate auth state
-                    navController.navigate(Screen.Splash.route) {
+                    navController.navigate(Screen.PatientOnboarding.route) {
                         popUpTo(Screen.Register.route) { inclusive = true }
                     }
                 }
@@ -151,6 +164,7 @@ fun DailyDoseNavigation(
             val homeViewModel  = koinViewModel<HomeViewModel>(viewModelStoreOwner = backStackEntry)
             val medViewModel  = koinViewModel<MedicationViewModel>(viewModelStoreOwner = backStackEntry)
             val careViewModel  = koinViewModel<CareViewModel>(viewModelStoreOwner = backStackEntry)
+            val settingsViewMode = koinViewModel< SettingsViewModel>(viewModelStoreOwner = backStackEntry)
             MainBottomNavigation(
                 onNavigateToAddMedication = {
                     navController.navigate(Screen.AddMedication.route)
@@ -167,8 +181,8 @@ fun DailyDoseNavigation(
                 onNavigateToHealthMetricHistory = { metricType ->
                     navController.navigate(Screen.HealthMetricHistory.createRoute(metricType))
                 },
-                onNavigateToSettings = {
-                    navController.navigate(Screen.Settings.route)
+                onNavigateToChangePassword = {
+                    navController.navigate(Screen.ChangePassword.route)
                 },
                 onNavigateToEditPatient = { patientId->
                     navController.navigate(Screen.EditPatient.createRoute(patientId))
@@ -180,7 +194,8 @@ fun DailyDoseNavigation(
                 },
                 homeViewModel,
                 medViewModel,
-                careViewModel = careViewModel
+                careViewModel = careViewModel,
+                settingsViewModel = settingsViewMode
             )
         }
         
@@ -281,16 +296,13 @@ fun DailyDoseNavigation(
 
         composable(Screen.EditPatient.route) { bk ->
             val medicationId = bk.arguments?.getString("patientId") ?: ""
-            val backStackEntry = remember(bk) {
-                navController.getBackStackEntry(Screen.Home.route)
-            }
-            val homeViewModel : HomeViewModel = koinViewModel<HomeViewModel>(viewModelStoreOwner = backStackEntry)
-            val medViewModel  = koinViewModel<MedicationViewModel>(viewModelStoreOwner = backStackEntry)
+            val patientOnboardingViewModel : PatientOnboardingViewModel = koinViewModel()
             PatientOnboardingScreen(
                 patientId = medicationId,
                 onNavigateToHome = {
                     navController.popBackStack()
-                }
+                },
+                patientOnboardingViewModel
             )
         }
     }

@@ -9,6 +9,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,22 +20,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.androidx.compose.koinViewModel
+import androidx.core.net.toUri
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     onNavigateToEditPatient: (String) -> Unit = {},
     onNavigateToLogin: () -> Unit = {},
+    onNavigateToChangePassword: () -> Unit = {},
     viewModel: SettingsViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
-
-    // Handle logout navigation
-    LaunchedEffect(Unit) {
-        // This would be triggered when logout is successful
-        // For now, we'll handle it through the callback
-    }
 
     // Show error snackbar
     uiState.error?.let { error ->
@@ -225,6 +222,35 @@ fun SettingsScreen(
                         modifier = Modifier.padding(top = 8.dp)
                     )
                 }
+
+                HorizontalDivider(
+                    modifier = Modifier.padding(vertical = 8.dp),
+                    thickness = DividerDefaults.Thickness,
+                    color = DividerDefaults.color
+                )
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        Icons.Default.Password,
+                        contentDescription = "Pass",
+                        modifier = Modifier.padding(end = 12.dp)
+                    )
+                    Text(
+                        text = "Change Password",
+                        fontSize = 16.sp,
+                        modifier = Modifier.weight(1f)
+                    )
+                    IconButton(onClick = {
+                        onNavigateToChangePassword()
+                    }) {
+                        Icon(Icons.Default.ArrowForward, contentDescription = "Rate App")
+                    }
+                }
             }
         }
 
@@ -265,7 +291,7 @@ fun SettingsScreen(
                     IconButton(onClick = {
                         // Open Play Store rating
                         val intent = Intent(Intent.ACTION_VIEW).apply {
-                            data = Uri.parse("market://details?id=${context.packageName}")
+                            data = "market://details?id=${context.packageName}".toUri()
                         }
                         context.startActivity(intent)
                     }) {
@@ -273,7 +299,11 @@ fun SettingsScreen(
                     }
                 }
 
-                Divider(modifier = Modifier.padding(vertical = 8.dp))
+                HorizontalDivider(
+                    modifier = Modifier.padding(vertical = 8.dp),
+                    thickness = DividerDefaults.Thickness,
+                    color = DividerDefaults.color
+                )
 
                 // Need Help
                 Row(
@@ -295,7 +325,7 @@ fun SettingsScreen(
                     IconButton(onClick = {
                         // Launch email app
                         val intent = Intent(Intent.ACTION_SENDTO).apply {
-                            data = Uri.parse("mailto:support@dailydose.com")
+                            data = "mailto:zahidmuneer.dev@gmail.com".toUri()
                             putExtra(Intent.EXTRA_SUBJECT, "DailyDose App Support")
                         }
                         context.startActivity(intent)

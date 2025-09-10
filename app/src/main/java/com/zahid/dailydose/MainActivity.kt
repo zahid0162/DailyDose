@@ -8,16 +8,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.zahid.dailydose.navigation.DailyDoseNavigation
 import com.zahid.dailydose.navigation.Screen
-import com.zahid.dailydose.presentation.AppDestination
-import com.zahid.dailydose.presentation.SimpleMainViewModel
 import com.zahid.dailydose.ui.theme.DailyDoseTheme
-import org.koin.androidx.compose.koinViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

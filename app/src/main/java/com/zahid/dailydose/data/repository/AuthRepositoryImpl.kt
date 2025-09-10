@@ -77,7 +77,33 @@ class AuthRepositoryImpl(
             isUserLoggedIn = false
         }
     }
-    
+
+    override suspend fun updateEmail(newEmail: String): Result<UserInfo> {
+        return try{
+            val result = supabaseClient.auth.updateUser {
+                email = newEmail
+            }
+            Result.success(result)
+        }catch (e: Exception){
+            Result.failure(e)
+        }
+
+
+    }
+
+    override suspend fun updatePassword(newPass: String): Result<UserInfo> {
+        return try{
+            val result = supabaseClient.auth.updateUser {
+                password = newPass
+            }
+            Result.success(result)
+        }catch (e: Exception){
+            Result.failure(e)
+        }
+
+
+    }
+
     override fun isLoggedIn(): Flow<Boolean> = flow {
         // Check both in-memory state and Supabase session
         val supabaseUser = supabaseClient.auth.currentUserOrNull()

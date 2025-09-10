@@ -10,9 +10,7 @@ import com.zahid.dailydose.domain.repository.HealthMetricRepository
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Order
 
-class HealthMetricRepositoryImpl(
-
-) : HealthMetricRepository {
+class HealthMetricRepositoryImpl: HealthMetricRepository {
 
     private val supabaseClient = SupabaseClient.client
 

@@ -21,7 +21,8 @@ data class SettingsUiState(
     val isEditingEmail: Boolean = false,
     val newEmail: String = "",
     val showDeleteAccountDialog: Boolean = false,
-    val isUpdatingEmail: Boolean = false
+    val isUpdatingEmail: Boolean = false,
+    val onPasswordUpdated: Boolean = false
 )
 
 class SettingsViewModel() : ViewModel(), KoinComponent {
@@ -105,23 +106,65 @@ class SettingsViewModel() : ViewModel(), KoinComponent {
             _uiState.value = _uiState.value.copy(isUpdatingEmail = true)
             
             try {
-                // Note: This would require implementing email update in AuthRepository
-                // For now, we'll just simulate the update
-                val currentUser = _uiState.value.user
-                if (currentUser != null) {
-                    val updatedUser = currentUser.copy(
-                        email = _uiState.value.newEmail,
-                        updatedAt = System.currentTimeMillis()
-                    )
-                    _uiState.value = _uiState.value.copy(
-                        user = updatedUser,
-                        isEditingEmail = false,
-                        isUpdatingEmail = false
-                    )
+                authRepository.updateEmail(_uiState.value.newEmail).
+                onSuccess {
+                    val currentUser = _uiState.value.user
+                    if(currentUser!=null){
+                        val updatedUser = currentUser.copy(
+                            email = it.newEmail?:currentUser.email,
+                            updatedAt = System.currentTimeMillis()
+                        )
+                        _uiState.value = _uiState.value.copy(
+                            user = updatedUser,
+                            isEditingEmail = false,
+                            isUpdatingEmail = false
+                        )
+                    }
+
                 }
+                    .onFailure {
+                        _uiState.value = _uiState.value.copy(
+                            error = it.message ?: "Failed to update email",
+                            isUpdatingEmail = false
+                        )
+                    }
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     error = e.message ?: "Failed to update email",
+                    isUpdatingEmail = false
+                )
+            }
+        }
+    }
+
+    fun savePassword(newPass: String) {
+        viewModelScope.launch {
+            try {
+                authRepository.updatePassword(newPass).
+                onSuccess {
+                    val currentUser = _uiState.value.user
+                    if(currentUser!=null){
+                        val updatedUser = currentUser.copy(
+                            email = it.newEmail?:currentUser.email,
+                            updatedAt = System.currentTimeMillis()
+                        )
+                        _uiState.value = _uiState.value.copy(
+                            user = updatedUser,
+                            isEditingEmail = false,
+                            isUpdatingEmail = false
+                        )
+                    }
+
+                }
+                    .onFailure {
+                        _uiState.value = _uiState.value.copy(
+                            error = it.message ?: "Failed to update password",
+                            isUpdatingEmail = false
+                        )
+                    }
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    error = e.message ?: "Failed to update password",
                     isUpdatingEmail = false
                 )
             }

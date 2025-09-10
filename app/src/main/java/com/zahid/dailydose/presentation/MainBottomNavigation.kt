@@ -25,6 +25,7 @@ import com.zahid.dailydose.presentation.medication.MedicationViewModel
 import com.zahid.dailydose.presentation.settings.SettingsScreen
 import com.zahid.dailydose.domain.model.HealthMetricType
 import com.zahid.dailydose.presentation.care.CareViewModel
+import com.zahid.dailydose.presentation.settings.SettingsViewModel
 import org.koin.androidx.compose.koinViewModel
 
 sealed class BottomNavItem(
@@ -47,12 +48,13 @@ fun MainBottomNavigation(
     onNavigateToEditMedication: (String) -> Unit = {},
     onNavigateToAddHealthMetric: (HealthMetricType) -> Unit = {},
     onNavigateToHealthMetricHistory: (HealthMetricType) -> Unit = {},
-    onNavigateToSettings: () -> Unit = {},
+    onNavigateToChangePassword: () -> Unit = {},
     onNavigateToEditPatient: (String) -> Unit = {},
     onNavigateToLogin: () -> Unit = {},
     homeViewModel: HomeViewModel = koinViewModel(),
     medicationViewModel: MedicationViewModel = koinViewModel(),
-    careViewModel: CareViewModel = koinViewModel()
+    careViewModel: CareViewModel = koinViewModel(),
+    settingsViewModel: SettingsViewModel= koinViewModel()
 ) {
     var selectedTab by rememberSaveable { mutableIntStateOf(0) }
     val tabs = listOf(
@@ -190,7 +192,8 @@ fun MainBottomNavigation(
                     )
                     4 -> SettingsScreen(
                         onNavigateToEditPatient = onNavigateToEditPatient,
-                        onNavigateToLogin = onNavigateToLogin
+                        onNavigateToLogin = onNavigateToLogin,
+                        onNavigateToChangePassword = onNavigateToChangePassword
                     )
                 }
             }
