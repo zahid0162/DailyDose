@@ -104,6 +104,15 @@ class AuthRepositoryImpl(
 
     }
 
+    override suspend fun resetPassword(email: String): Result<Unit> {
+        return try{
+            val result = supabaseClient.auth.resetPasswordForEmail(email)
+            Result.success(result)
+        }catch (e: Exception){
+            Result.failure(e)
+        }
+    }
+
     override fun isLoggedIn(): Flow<Boolean> = flow {
         // Check both in-memory state and Supabase session
         val supabaseUser = supabaseClient.auth.currentUserOrNull()

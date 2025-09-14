@@ -13,6 +13,8 @@ interface AuthRepository {
 
     suspend fun updateEmail(newEmail: String): Result<UserInfo>
     suspend fun updatePassword(newPass: String): Result<UserInfo>
+
+    suspend fun resetPassword(email:String):Result<Unit>
     fun isLoggedIn(): Flow<Boolean>
     suspend fun getCurrentUser(): Result<com.zahid.dailydose.domain.model.User>
 }

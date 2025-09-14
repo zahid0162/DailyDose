@@ -22,6 +22,7 @@ import com.zahid.dailydose.presentation.onboarding.OnboardingScreen
 import com.zahid.dailydose.presentation.patient.PatientOnboardingScreen
 import com.zahid.dailydose.presentation.splash.SplashScreen
 import com.zahid.dailydose.domain.model.HealthMetricType
+import com.zahid.dailydose.presentation.auth.ForgotPasswordScreen
 import com.zahid.dailydose.presentation.care.CareViewModel
 import com.zahid.dailydose.presentation.patient.PatientOnboardingViewModel
 import com.zahid.dailydose.presentation.settings.SettingsViewModel
@@ -31,6 +32,7 @@ sealed class Screen(val route: String) {
     object Splash : Screen("splash")
     object Onboarding : Screen("onboarding")
     object Login : Screen("login")
+    object ForgotPassword: Screen("forgot_password")
     object Register : Screen("register")
     object PatientOnboarding : Screen("patient_onboarding")
     object Home : Screen("home")
@@ -120,6 +122,9 @@ fun DailyDoseNavigation(
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }
                 },
+                onNavigateToForgot = {
+                    navController.navigate(Screen.ForgotPassword.route)
+                },
                 onNavigateToPatientOnboarding = {
                     // Navigate back to splash to re-evaluate auth state
                     navController.navigate(Screen.PatientOnboarding.route) {
@@ -127,6 +132,12 @@ fun DailyDoseNavigation(
                     }
                 }
             )
+        }
+
+        composable(Screen.ForgotPassword.route) {
+            ForgotPasswordScreen(onFinish = {
+                navController.popBackStack()
+            })
         }
         
         composable(Screen.Register.route) {

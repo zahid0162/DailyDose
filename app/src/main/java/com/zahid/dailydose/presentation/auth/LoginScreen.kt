@@ -1,6 +1,8 @@
 package com.zahid.dailydose.presentation.auth
 
+import android.graphics.Color
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
@@ -18,6 +20,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.ktor.websocket.Frame
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -25,6 +28,7 @@ import org.koin.androidx.compose.koinViewModel
 fun LoginScreen(
     onNavigateToRegister: () -> Unit,
     onNavigateToHome: () -> Unit,
+    onNavigateToForgot:() -> Unit,
     onNavigateToPatientOnboarding: () -> Unit,
     viewModel: LoginViewModel = koinViewModel()
 ) {
@@ -120,6 +124,13 @@ fun LoginScreen(
                 isError = uiState.errorMessage != null,
                 shape = MaterialTheme.shapes.medium
             )
+            Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
+                TextButton(
+                    onClick = onNavigateToForgot
+                ) {
+                    Text("Forgot Password", color = MaterialTheme.colorScheme.primary)
+                }
+            }
             
             // Error Message
             uiState.errorMessage?.let { error ->

@@ -1,5 +1,6 @@
 package com.zahid.dailydose
 
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -13,15 +14,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
+import com.zahid.dailydose.data.supabase.SupabaseClient
 import com.zahid.dailydose.navigation.DailyDoseNavigation
 import com.zahid.dailydose.navigation.Screen
 import com.zahid.dailydose.presentation.medication.NotificationPermissionHandler
 import com.zahid.dailydose.ui.theme.DailyDoseTheme
+import io.github.jan.supabase.auth.handleDeeplinks
+import org.koin.android.ext.android.inject
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        
         setContent {
             DailyDoseTheme {
                 Surface(

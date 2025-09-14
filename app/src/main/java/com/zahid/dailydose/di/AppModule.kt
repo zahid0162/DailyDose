@@ -16,6 +16,7 @@ import com.zahid.dailydose.domain.repository.MedicationRepository
 import com.zahid.dailydose.domain.repository.PatientRepository
 import com.zahid.dailydose.presentation.SimpleAuthManager
 import com.zahid.dailydose.presentation.SimpleMainViewModel
+import com.zahid.dailydose.presentation.auth.ForgotPasswordViewModel
 import com.zahid.dailydose.presentation.auth.LoginViewModel
 import com.zahid.dailydose.presentation.auth.RegisterViewModel
 import com.zahid.dailydose.presentation.care.CareViewModel
@@ -53,6 +54,7 @@ val appModule = module {
     // ViewModels
     viewModel { SimpleMainViewModel() }
     viewModel { LoginViewModel(get(), get()) }
+    viewModel { ForgotPasswordViewModel(get()) }
     viewModel { RegisterViewModel(get()) }
     viewModel { HomeViewModel(get()) }
     viewModel { CareViewModel(get()) }
