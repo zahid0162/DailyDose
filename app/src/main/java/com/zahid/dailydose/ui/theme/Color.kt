@@ -8,6 +8,16 @@ val MedicalGreenLight = Color(0xFF6FC19C)  // Lighter variant for secondary elem
 val MedicalCyan = Color(0xFF00BFA5)        // Care/health accents
 val MedicalTeal = Color(0xFF00796B)        // Wellness, calming actions
 
+// Medical Blue Colors
+val MedicalBlue = Color(0xFF1976D2)        // Trust, reliability
+val MedicalBlueLight = Color(0xFF42A5F5)   // Lighter medical blue
+
+// Medical Status Colors
+val MedicalSuccess = Color(0xFF4CAF50)     // Success states
+val MedicalWarning = Color(0xFFFF9800)     // Warning states
+val MedicalError = Color(0xFFE53935)       // Error states
+val MedicalInfo = Color(0xFF2196F3)        // Info states
+
 // Gray Scale
 val MedicalGray = Color(0xFF607D8B)        // Neutral gray for text/icons
 val MedicalGrayLight = Color(0xFFB0BEC5)   // Light gray for surfaces

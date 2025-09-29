@@ -16,6 +16,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
 import com.zahid.dailydose.domain.model.HealthMetricType
 import com.zahid.dailydose.presentation.auth.LoginEffect
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -36,6 +37,7 @@ fun AddHealthMetricScreen(
                 CareEvents.OnAddedNew -> {
                     onAddedNew()
                 }
+                 else -> {}
             }
         }
     }

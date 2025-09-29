@@ -1,17 +1,24 @@
 package com.zahid.dailydose.presentation.care
 
+import android.content.Intent
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zahid.dailydose.domain.model.HealthMetric
 import com.zahid.dailydose.domain.model.HealthMetricType
@@ -27,8 +34,8 @@ fun HealthMetricsHistoryScreen(
     viewModel: CareViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
-
+    val context = LocalContext.current
+    var showDateRangePicker by remember { mutableStateOf(false) }
 
     val title = when (metricType) {
         HealthMetricType.BLOOD_PRESSURE_SYSTOLIC -> "Blood Pressure (Systolic) History"
@@ -39,6 +46,38 @@ fun HealthMetricsHistoryScreen(
         HealthMetricType.DIABETES -> "Diabetes History"
     }
 
+    // Handle PDF export events
+    LaunchedEffect(viewModel.effects) {
+        viewModel.effects.collect { event ->
+            when (event) {
+                is CareEvents.OnPdfExported -> {
+                    Toast.makeText(context, "PDF exported successfully to Downloads folder", Toast.LENGTH_LONG).show()
+                    
+                    // Open the PDF file
+                    val intent = Intent(Intent.ACTION_VIEW).apply {
+                        val uri = FileProvider.getUriForFile(
+                            context,
+                            "${context.packageName}.fileprovider",
+                            event.file
+                        )
+                        setDataAndType(uri, "application/pdf")
+                        flags = Intent.FLAG_ACTIVITY_NO_HISTORY or Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    }
+                    
+                    try {
+                        context.startActivity(intent)
+                    } catch (e: Exception) {
+                        Toast.makeText(context, "No PDF viewer found", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                is CareEvents.OnExportError -> {
+                    Toast.makeText(context, "Export failed: ${event.message}", Toast.LENGTH_LONG).show()
+                }
+                else -> {}
+            }
+        }
+    }
+
     LaunchedEffect(true) {
         viewModel.loadAllData(type = metricType)
     }
@@ -46,10 +85,22 @@ fun HealthMetricsHistoryScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(title) },
+                title = { Text(title, overflow = TextOverflow.Ellipsis) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                actions = {
+                    if (!uiState.allMetrics.isEmpty()) {
+                        IconButton(
+                            onClick = { showDateRangePicker = true }
+                        ) {
+                            Icon(
+                                Icons.Default.FileDownload, 
+                                contentDescription = "Export to PDF"
+                            )
+                        }
                     }
                 }
             )
@@ -100,6 +151,16 @@ fun HealthMetricsHistoryScreen(
                 }
             }
         }
+    }
+    
+    // Date Range Picker Dialog
+    if (showDateRangePicker) {
+        DateRangePickerDialog(
+            onDismiss = { showDateRangePicker = false },
+            onDateRangeSelected = { startDate, endDate ->
+                viewModel.exportToPdf(context, metricType, startDate, endDate)
+            }
+        )
     }
 }
 

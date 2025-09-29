@@ -11,6 +11,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zahid.dailydose.R
+import com.zahid.dailydose.presentation.medication.NotificationPermissionHandler
 import com.zahid.dailydose.ui.theme.SplashBg
 import org.koin.androidx.compose.koinViewModel
 
@@ -34,35 +35,44 @@ fun SplashScreen(
             SplashDestination.Loading -> { /* Stay on splash */ }
         }
     }
-    
-    // Splash Screen UI
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(SplashBg),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            // App Logo/Icon
-            Image(
-                painter = painterResource(id = R.drawable.app_logo),
-                contentDescription = "DailyDose Logo",
-                modifier = Modifier.size(150.dp)
-            )
+    val snackbarHostState = remember { SnackbarHostState() }
 
-            
-            Spacer(modifier = Modifier.height(48.dp))
-            
-            // Loading Indicator
-            if (uiState.isLoading) {
-                CircularProgressIndicator(
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(32.dp)
+    Scaffold(snackbarHost = {
+        snackbarHostState
+    }) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(SplashBg)
+                .padding(it),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                NotificationPermissionHandler(snackbarHostState){}
+                // App Logo/Icon
+                Image(
+                    painter = painterResource(id = R.drawable.app_logo),
+                    contentDescription = "DailyDose Logo",
+                    modifier = Modifier.size(150.dp)
                 )
+
+
+                Spacer(modifier = Modifier.height(48.dp))
+
+                // Loading Indicator
+                if (uiState.isLoading) {
+                    CircularProgressIndicator(
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
             }
         }
     }
+    
+    // Splash Screen UI
+
 }

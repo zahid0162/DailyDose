@@ -48,10 +48,6 @@ class MedicationViewModel(val supabaseClient: SupabaseClient) : ViewModel(), Koi
                 
                 if (userId != null) {
                     val medications = medicationRepository.getMedicationsByUserId(userId)
-                    medications.forEach {
-                        notificationService.scheduleMedicationReminders(it)
-                    }
-
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
                         medications = medications

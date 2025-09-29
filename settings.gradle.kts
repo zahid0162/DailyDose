@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "DailyDose"
+rootProject.name = "Mediq"
 include(":app")
  

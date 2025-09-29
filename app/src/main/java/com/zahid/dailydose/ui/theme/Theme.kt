@@ -50,12 +50,14 @@ private val DarkColorScheme = darkColorScheme(
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = MedicalGreen,
+    primary = MedicalBlue,
     onPrimary = TextOnPrimary,
-    primaryContainer = MedicalGreenLight,
+    primaryContainer = MedicalBlueLight,
     onPrimaryContainer = TextPrimary,
 
+    secondary = MedicalGreen,
     onSecondary = TextOnPrimary,
+    secondaryContainer = MedicalGreenLight,
     onSecondaryContainer = TextPrimary,
 
     tertiary = MedicalTeal,
@@ -79,7 +81,7 @@ private val LightColorScheme = lightColorScheme(
     outlineVariant = MedicalGrayLight,
 
     scrim = Color.Black.copy(alpha = 0.32f),
-    surfaceTint = MedicalGreen
+    surfaceTint = MedicalBlue
 )
 
 @Composable

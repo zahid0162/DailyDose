@@ -26,9 +26,7 @@ fun MedicationScreen(
     viewModel: MedicationViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    NotificationPermissionHandler(snackbarHostState){
-        viewModel.saveReminders()
-    }
+
     when {
         uiState.isLoading -> {
             Box(

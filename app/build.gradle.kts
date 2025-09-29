@@ -88,6 +88,9 @@ dependencies {
     // DataStore
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.compose.animation.core)
+    
+    // PDF Generation
+    implementation(libs.itext7.core)
 
     // Testing
     testImplementation(libs.junit)

@@ -2,19 +2,26 @@ package com.zahid.dailydose.presentation.auth
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.zahid.dailydose.data.service.NotificationService
 import com.zahid.dailydose.domain.model.LoginRequest
 import com.zahid.dailydose.domain.repository.AuthRepository
+import com.zahid.dailydose.domain.repository.MedicationRepository
 import com.zahid.dailydose.domain.repository.PatientRepository
+import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.auth.auth
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+import kotlin.getValue
 
 data class LoginUiState(
-    val email: String = "zaidmuneer25@gmail.com",
-    val password: String = "123456",
+    val email: String = "",
+    val password: String = "",
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val isLoginSuccessful: Boolean = false
@@ -37,8 +44,12 @@ sealed class LoginEffect {
 
 class LoginViewModel(
     private val authRepository: AuthRepository,
-    private val patientRepository: PatientRepository
-) : ViewModel() {
+    private val patientRepository: PatientRepository,
+    val supabaseClient: SupabaseClient
+) : ViewModel(), KoinComponent {
+
+    private val medicationRepository: MedicationRepository by inject()
+    private val notificationService: NotificationService by inject()
     
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
@@ -105,6 +116,7 @@ class LoginViewModel(
             
             result.fold(
                 onSuccess = { authResponse ->
+                    loadMedications()
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
                         isLoginSuccessful = true
@@ -130,6 +142,21 @@ class LoginViewModel(
                     )
                 }
             )
+        }
+    }
+
+    private fun loadMedications() {
+        viewModelScope.launch {
+            try {
+                val userId = supabaseClient.auth.currentUserOrNull()?.id
+
+                if (userId != null) {
+                    val medications = medicationRepository.getMedicationsByUserId(userId)
+                    medications.forEach {
+                        notificationService.scheduleMedicationReminders(it)
+                    }
+                }
+            } catch (e: Exception) { }
         }
     }
 }
